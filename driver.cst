@@ -1,8 +1,8 @@
 IO_LOC "data[0]"  31;
 IO_LOC "data[1]"  30;
 IO_LOC "data[2]"  29;
-IO_LOC "data[3]"  25;
-IO_LOC "data[4]"  26;
+IO_LOC "data[3]"  26;
+IO_LOC "data[4]"  25;
 IO_LOC "data[5]"  28;
 IO_LOC "data[6]"  27;
 IO_LOC "data[7]"  77;
@@ -49,3 +49,53 @@ IO_PORT "select"  IO_TYPE=LVCMOS33 DRIVE=8;
 IO_PORT "reset"   IO_TYPE=LVCMOS33 DRIVE=8;
 IO_PORT "write"   IO_TYPE=LVCMOS33 DRIVE=8;
 IO_PORT "clock"   IO_TYPE=LVCMOS33
+
+                if (realYCoord < 9'd320) begin
+                    if (realXCoord < 9'd480) begin
+                        case (writeCycle)
+                            3'b000: begin
+                                extraStatus <= 1'd0;
+                                command <= 1'd1;
+                                writeCycle <= writeCycle + 3'd1;
+                                if (realYCoord >= 9'd60 && realYCoord < 9'd260 && realXCoord >= 9'd140 && realXCoord < 9'd340) begin
+                                    dataBus <= 16'h07E0; // Green Box
+                                end else begin
+                                    dataBus <= 16'h0000; // Black Background
+                                end
+                                select <= 1'd0;
+                            end
+                            3'b001: begin
+                                writeCycle <= writeCycle + 3'd1;
+                            end
+                            3'b010: begin
+                                write <= 1'd0;
+                                writeCycle <= writeCycle + 3'd1;
+                            end
+                            3'b011: begin 
+                                writeCycle <= writeCycle + 3'd1;
+                            end
+                            3'b100: begin
+                                writeCycle <= writeCycle + 3'd1;
+                            end
+                            3'b101: begin
+                                write <= 1'd1;
+                                writeCycle <= writeCycle + 3'd1;
+                            end
+                            3'b110: begin
+                                writeCycle <= writeCycle + 3'd1;
+                                select <= 1'd1;
+                            end
+                            3'b111: begin
+                                writeCycle <= 3'd0;
+                                pixelIndex <= pixelIndex + 18'd1;
+                                realXCoord <= realXCoord + 9'd1;
+                            end
+                        endcase
+                    end else begin
+                        realXCoord <= 9'd0;
+                        realYCoord <= realYCoord + 9'd1;
+                    end
+                end else begin
+                    realYCoord <= 9'd0;
+                    pixelIndex <= 16'd0;
+                end
