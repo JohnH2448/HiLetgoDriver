@@ -1,0 +1,340 @@
+7'b0000010: begin
+    command <= 1'd0;
+    dataBus <= 16'h01;
+end
+
+7'b0000011: begin
+    command <= 1'd1;
+    dataBus <= 16'h00;
+end
+
+7'b0000101: begin
+    command <= 1'd0;
+    dataBus <= 16'h28;
+end
+
+7'b0000110: begin
+    command <= 1'd1;
+    dataBus <= 16'h00;
+end
+
+7'b0000111: begin
+    command <= 1'd0;
+    dataBus <= 16'hC0;
+end
+
+7'b0001000: begin
+    command <= 1'd1;
+    dataBus <= 16'h0d;
+end
+
+7'b0001001: begin
+    command <= 1'd1;
+    dataBus <= 16'h0d;
+end
+
+7'b0001010: begin
+    command <= 1'd0;
+    dataBus <= 16'hC1;
+end
+
+7'b0001011: begin
+    command <= 1'd1;
+    dataBus <= 16'h43;
+end
+
+7'b0001100: begin
+    command <= 1'd1;
+    dataBus <= 16'h00;
+end
+
+7'b0001101: begin
+    command <= 1'd0;
+    dataBus <= 16'hC2;
+end
+
+7'b0001110: begin
+    command <= 1'd1;
+    dataBus <= 16'h00;
+end
+
+7'b0001111: begin
+    command <= 1'd0;
+    dataBus <= 16'hC5;
+end
+
+7'b0010000: begin
+    command <= 1'd1;
+    dataBus <= 16'h00;
+end
+
+7'b0010001: begin
+    command <= 1'd1;
+    dataBus <= 16'h48;
+end
+
+7'b0010010: begin
+    command <= 1'd0;
+    dataBus <= 16'hB6;
+end
+
+7'b0010011: begin
+    command <= 1'd1;
+    dataBus <= 16'h00;
+end
+
+7'b0010100: begin
+    command <= 1'd1;
+    dataBus <= 16'h22;
+end
+
+7'b0010101: begin
+    command <= 1'd1;
+    dataBus <= 16'h3B;
+end
+
+7'b0010110: begin
+    command <= 1'd0;
+    dataBus <= 16'hE0;
+end
+
+7'b0010111: begin
+    command <= 1'd1;
+    dataBus <= 16'h0f;
+end
+
+7'b0011000: begin
+    command <= 1'd1;
+    dataBus <= 16'h24;
+end
+
+7'b0011001: begin
+    command <= 1'd1;
+    dataBus <= 16'h1c;
+end
+
+7'b0011010: begin
+    command <= 1'd1;
+    dataBus <= 16'h0a;
+end
+
+7'b0011011: begin
+    command <= 1'd1;
+    dataBus <= 16'h0f;
+end
+
+7'b0011100: begin
+    command <= 1'd1;
+    dataBus <= 16'h08;
+end
+
+7'b0011101: begin
+    command <= 1'd1;
+    dataBus <= 16'h43;
+end
+
+7'b0011110: begin
+    command <= 1'd1;
+    dataBus <= 16'h88;
+end
+
+7'b0011111: begin
+    command <= 1'd1;
+    dataBus <= 16'h32;
+end
+
+7'b0100000: begin
+    command <= 1'd1;
+    dataBus <= 16'h0f;
+end
+
+7'b0100001: begin
+    command <= 1'd1;
+    dataBus <= 16'h10;
+end
+
+7'b0100010: begin
+    command <= 1'd1;
+    dataBus <= 16'h06;
+end
+
+7'b0100011: begin
+    command <= 1'd1;
+    dataBus <= 16'h0f;
+end
+
+7'b0100100: begin
+    command <= 1'd1;
+    dataBus <= 16'h07;
+end
+
+7'b0100101: begin
+    command <= 1'd1;
+    dataBus <= 16'h00;
+end
+
+7'b0100110: begin
+    command <= 1'd0;
+    dataBus <= 16'hE1;
+end
+
+7'b0100111: begin
+    command <= 1'd1;
+    dataBus <= 16'h0F;
+end
+
+7'b0101000: begin
+    command <= 1'd1;
+    dataBus <= 16'h38;
+end
+
+7'b0101001: begin
+    command <= 1'd1;
+    dataBus <= 16'h30;
+end
+
+7'b0101010: begin
+    command <= 1'd1;
+    dataBus <= 16'h09;
+end
+
+7'b0101011: begin
+    command <= 1'd1;
+    dataBus <= 16'h0f;
+end
+
+7'b0101100: begin
+    command <= 1'd1;
+    dataBus <= 16'h0f;
+end
+
+7'b0101101: begin
+    command <= 1'd1;
+    dataBus <= 16'h4e;
+end
+
+7'b0101110: begin
+    command <= 1'd1;
+    dataBus <= 16'h77;
+end
+
+7'b0101111: begin
+    command <= 1'd1;
+    dataBus <= 16'h3c;
+end
+
+7'b0110000: begin
+    command <= 1'd1;
+    dataBus <= 16'h07;
+end
+
+7'b0110001: begin
+    command <= 1'd1;
+    dataBus <= 16'h10;
+end
+
+7'b0110010: begin
+    command <= 1'd1;
+    dataBus <= 16'h05;
+end
+
+7'b0110011: begin
+    command <= 1'd1;
+    dataBus <= 16'h23;
+end
+
+7'b0110100: begin
+    command <= 1'd1;
+    dataBus <= 16'h1b;
+end
+
+7'b0110101: begin
+    command <= 1'd1;
+    dataBus <= 16'h00;
+end
+
+7'b0110110: begin
+    command <= 1'd0;
+    dataBus <= 16'h20;
+end
+
+7'b0110111: begin
+    command <= 1'd0;
+    dataBus <= 16'h36;
+end
+
+7'b0111000: begin
+    command <= 1'd1;
+    dataBus <= 16'h28;
+end
+
+7'b0111001: begin
+    command <= 1'd0;
+    dataBus <= 16'h3A;
+end
+
+7'b0111010: begin
+    command <= 1'd1;
+    dataBus <= 16'h55;
+end
+
+7'b0111011: begin
+    command <= 1'd0;
+    dataBus <= 16'h11;
+end
+
+7'b0111101: begin
+    command <= 1'd0;
+    dataBus <= 16'h29;
+end
+
+7'b0111111: begin
+    command <= 1'd0;
+    dataBus <= 16'h2A;
+end
+
+7'b1000000: begin
+    command <= 1'd1;
+    dataBus <= 16'h00;
+end
+
+7'b1000001: begin
+    command <= 1'd1;
+    dataBus <= 16'h00;
+end
+
+7'b1000010: begin
+    command <= 1'd1;
+    dataBus <= 16'h01;
+end
+
+7'b1000011: begin
+    command <= 1'd1;
+    dataBus <= 16'hDF;
+end
+
+7'b1000100: begin
+    command <= 1'd0;
+    dataBus <= 16'h2B;
+end
+
+7'b1000101: begin
+    command <= 1'd1;
+    dataBus <= 16'h00;
+end
+
+7'b1000110: begin
+    command <= 1'd1;
+    dataBus <= 16'h00;
+end
+
+7'b1000111: begin
+    command <= 1'd1;
+    dataBus <= 16'h01;
+end
+
+7'b1001000: begin
+    command <= 1'd1;
+    dataBus <= 16'h3F;
+end
+

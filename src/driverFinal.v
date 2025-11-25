@@ -5,17 +5,14 @@ module top (
     output reg select,
     output reg reset,
     output reg write,
-    output wire bootStatus,
-    output wire clockEdge,
-    output reg extraStatus
+    output reg extraStatus,
+    input wire start
 );
 
+    // Driver Pipeline
     reg [15:0] dataBus;
-    reg [7:0] xCoord;
-    reg [7:0] yCoord;
-    reg [8:0] realXCoord;
-    reg [8:0] realYCoord;
-    reg [17:0] pixelIndex;
+    reg [8:0] xCoord;
+    reg [8:0] yCoord;
     assign data = dataBus;
     reg boot;
     reg [6:0] bootStage;
@@ -25,23 +22,24 @@ module top (
     reg [26:0] divider;
     wire slowClock;
     assign slowClock = divider[20];
-    assign bootStatus = !boot;
-    assign clockEdge = divider[20]; 
-    wire [5:0] boxX = realXCoord - 9'd210;  // 0..59
-    wire [5:0] boxY = realYCoord - 9'd130;  // 0..59
-    wire [11:0] boxIndex = boxY * 7'd60 + boxX;
-    reg [15:0] boxMem [0:3599];
+    reg busy;
 
-    wire inBox =
-        (realXCoord >= 9'd210 && realXCoord < 9'd270 &&
-        realYCoord >= 9'd130 && realYCoord < 9'd190);
+    // Memory Interface
+    reg [8:0] readAddress;
+    reg [15:0] readData;
+    reg [8:0] writeAddress;
+    reg [15:0] writeData;
+    reg writeEnable;
 
-    // Extra
-    reg [5:0]  fb_x;
-    reg [5:0]  fb_y;
-    wire [11:0] fb_index = fb_y * 7'd60 + fb_x;
-    reg [5:0]  animPhase;
-    reg [23:0] animTick;
+    // RAM Instance
+    ramLine myRam (
+        .clock(clock),
+        .readAddress(readAddress),
+        .readData(readData),
+        .writeAddress(writeAddress),
+        .writeData(writeData),
+        .writeEnable(writeEnable)
+    );
  
     initial begin
         boot = 1'd1;
@@ -55,13 +53,8 @@ module top (
         select = 1'b1;
         divider = 27'd0;
         extraStatus = 1'd1;
-        pixelIndex = 18'd0;
-        realXCoord = 9'd0;
-        realYCoord = 9'd0;
-        fb_x      = 6'd0;
-        fb_y      = 6'd0;
-        animPhase = 6'd0;
-        animTick  = 24'd0;
+        xCoord = 9'd0;
+        yCoord = 9'd0;
     end
 
     always @(posedge clock) begin
@@ -69,6 +62,7 @@ module top (
     end
 
     always @(posedge clock) begin
+        // Init Sequence
         if (boot) begin
             case (bootStage)
                 7'b1111111: begin // Startup Delay
@@ -403,7 +397,7 @@ module top (
 
                             7'b0111000: begin
                                 command <= 1'd1;
-                                dataBus <= 16'h0A;
+                                dataBus <= 16'h28;
                             end
 
                             7'b0111001: begin
@@ -443,12 +437,12 @@ module top (
 
                             7'b1000010: begin
                                 command <= 1'd1;
-                                dataBus <= 16'h01; // Y high
+                                dataBus <= 16'h01;
                             end
 
                             7'b1000011: begin
                                 command <= 1'd1;
-                                dataBus <= 16'h3F; // Y low
+                                dataBus <= 16'hDF;
                             end
 
                             7'b1000100: begin
@@ -468,12 +462,12 @@ module top (
 
                             7'b1000111: begin
                                 command <= 1'd1;
-                                dataBus <= 16'h01; // X high
+                                dataBus <= 16'h01;
                             end
 
                             7'b1001000: begin
                                 command <= 1'd1;
-                                dataBus <= 16'hDF; // X low
+                                dataBus <= 16'h3F;
                             end
                         endcase 
                         writeCycle <= writeCycle + 3'd1;
@@ -487,28 +481,24 @@ module top (
                         writeCycle <= writeCycle + 3'd1;
                     end
                     3'b011: begin
+                        write      <= 1'd1;
                         writeCycle <= writeCycle + 3'd1;
                     end
                     3'b100: begin
                         writeCycle <= writeCycle + 3'd1;
-                    end
-                    3'b101: begin
-                        write      <= 1'd1;
-                        writeCycle <= writeCycle + 3'd1;
-                    end
-                    3'b110: begin
-                        writeCycle <= writeCycle + 3'd1;
                         select <= 1'd1;
                     end
-                    3'b111: begin
+                    3'b101: begin
                         writeCycle <= 3'd0;
                         bootStage  <= bootStage + 7'd1;
                     end
                 endcase
             end
         end else begin
+        // Write Sequence
             if (!frameStarted) begin
-                case (writeCycle) // Write Command
+                // Write Command
+                case (writeCycle)
                     3'b000: begin
                         command   <= 1'd0;
                         writeCycle <= writeCycle + 3'd1;
@@ -542,85 +532,51 @@ module top (
                     end
                 endcase
             end else begin
-                if (realXCoord < 9'd480) begin
-                    if (realYCoord < 9'd320) begin
+                if (yCoord < 9'd320) begin
+                    if (xCoord < 9'd480) begin
                         case (writeCycle)
                             3'b000: begin
                                 extraStatus <= 1'd0;
                                 command     <= 1'd1;
                                 writeCycle  <= writeCycle + 3'd1;
-                                if (inBox) begin
-                                    dataBus <= boxMem[boxIndex];   // pixel from 200x200 buffer
-                                end else begin
-                                    dataBus <= 16'h0000;           // black outside box
-                                end
                                 select <= 1'd0;
+                                readAddress <= xCoord;
                             end
                             3'b001: begin
+                                dataBus <= readData;
                                 writeCycle <= writeCycle + 3'd1;
                             end
                             3'b010: begin
-                                write <= 1'd0;
+                                write      <= 1'd0;
                                 writeCycle <= writeCycle + 3'd1;
                             end
-                            3'b011: begin 
+                            3'b011: begin
+                                write      <= 1'd1;
                                 writeCycle <= writeCycle + 3'd1;
                             end
                             3'b100: begin
                                 writeCycle <= writeCycle + 3'd1;
+                                select     <= 1'd1;
                             end
                             3'b101: begin
-                                write <= 1'd1;
-                                writeCycle <= writeCycle + 3'd1;
-                            end
-                            3'b110: begin
-                                writeCycle <= writeCycle + 3'd1;
-                                select <= 1'd1;
-                            end
-                            3'b111: begin
-                                writeCycle <= 3'd0;
-                                pixelIndex <= pixelIndex + 18'd1;
-                                realYCoord <= realYCoord + 9'd1;
+                                xCoord  <= xCoord + 9'd1;
+                                if (delay < 22'd297000) begin // ~11ms
+                                    delay <= delay + 22'd1;
+                                end else begin
+                                    writeCycle  <= 3'd0;
+                                    delay <= 22'd0;
+                                end
                             end
                         endcase
                     end else begin
-                        realYCoord <= 9'd0;
-                        realXCoord <= realXCoord + 9'd1;
+                        xCoord <= 9'd0;
+                        yCoord <= yCoord + 9'd1;
                     end
                 end else begin
-                    realXCoord <= 9'd0;
-                    pixelIndex <= 18'd0;
+                    yCoord <= 9'd0;
+                    xCoord <= 9'd0;
                 end
-            end
-            // calcs
-            if (fb_x == 6'd0 || fb_x == 6'd59 || fb_y == 6'd0 || fb_y == 6'd59)
-                boxMem[fb_index] <= 16'hF800;   // red border
-            else if (fb_x >= animPhase && fb_x < animPhase + 6'd4 && fb_x < 6'd60)
-                boxMem[fb_index] <= 16'h07E0;   // green bar 4px wide
-            else
-                boxMem[fb_index] <= 16'h0000;   // black inside
-
-            if (fb_x == 6'd59) begin
-                fb_x <= 6'd0;
-                if (fb_y == 6'd59)
-                    fb_y <= 6'd0;
-                else
-                    fb_y <= fb_y + 6'd1;
-            end else begin
-                fb_x <= fb_x + 6'd1;
-            end
-
-            // slow animation step
-            animTick <= animTick + 24'd1;
-            if (animTick == 24'd20000) begin  // smaller number = faster sweep
-                animTick <= 24'd0;
-
-                if (animPhase >= 6'd56)
-                    animPhase <= 6'd0;
-                else
-                    animPhase <= animPhase + 6'd1;
             end
         end
     end
 endmodule
-

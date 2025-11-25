@@ -1,25 +1,25 @@
 commands = [
-    "writecommand(0x01)",
-    "writedata(0x00)",
-    "delay(50)",
-    "writecommand(0x28)",
-    "writedata(0x00)",
-    "writecommand(0xC0)",
-    "writedata(0x0d)",
-    "writedata(0x0d)",
-    "writecommand(0xC1)",
-    "writedata(0x43)",
-    "writedata(0x00)",
-    "writecommand(0xC2)",
-    "writedata(0x00)",
-    "writecommand(0xC5)",
-    "writedata(0x00)",
-    "writedata(0x48)",
-    "writecommand(0xB6)",
-    "writedata(0x00)",
-    "writedata(0x22)",
-    "writedata(0x3B)",
-    "writecommand(0xE0)",
+    "writecommand(0x01)",   # Software reset
+    "writedata(0x00)",      # Extra ignored byte (SWRESET has no params)
+    "delay(50)",            # Wait for internal reset
+    "writecommand(0x28)",   # Display OFF
+    "writedata(0x00)",      # Ignored param
+    "writecommand(0xC0)",   # Power Control 1
+    "writedata(0x0d)",      # VRH (reference voltage setting)
+    "writedata(0x0d)",      # VRL (reference voltage setting)
+    "writecommand(0xC1)",   # Power Control 2
+    "writedata(0x43)",      # VGH/VGL ratio / step-up factors
+    "writedata(0x00)",      # Additional power tweaks
+    "writecommand(0xC2)",   # Power Control 3 (Normal mode)
+    "writedata(0x00)",      # Default op-amp current
+    "writecommand(0xC5)",   # VCOM Control
+    "writedata(0x00)",      # VCOM offset
+    "writedata(0x48)",      # VCOM amplitude (prevents flicker)
+    "writecommand(0xB6)",   # Display Function Control (scan timings)
+    "writedata(0x00)",      # Scan mode / RGB interface
+    "writedata(0x22)",      # Porch control / line inversion
+    "writedata(0x3B)",      # More porch + timing options
+    "writecommand(0xE0)",   # Positive Gamma Correction
     "writedata(0x0f)",
     "writedata(0x24)",
     "writedata(0x1c)",
@@ -34,8 +34,8 @@ commands = [
     "writedata(0x06)",
     "writedata(0x0f)",
     "writedata(0x07)",
-    "writedata(0x00)",
-    "writecommand(0xE1)",
+    "writedata(0x00)",      # End of gamma curve
+    "writecommand(0xE1)",   # Negative Gamma Correction
     "writedata(0x0F)",
     "writedata(0x38)",
     "writedata(0x30)",
@@ -50,28 +50,29 @@ commands = [
     "writedata(0x05)",
     "writedata(0x23)",
     "writedata(0x1b)",
-    "writedata(0x00)",
-    "writecommand(0x20)",
-    "writecommand(0x36)",
-    "writedata(0x0A)",
-    "writecommand(0x3A)",
-    "writedata(0x55)",
-    "writecommand(0x11)",
-    "delay(150)",
-    "writecommand(0x29)",
-    "delay(25)",
-    "writecommand(0x2A)",
-    "writedata(0x00)",
-    "writedata(0x00)",
-    "writedata(0x01)",
-    "writedata(0xDF)",
-    "writecommand(0x2B)",
-    "writedata(0x00)",
-    "writedata(0x00)",
-    "writedata(0x01)",
-    "writedata(0x3F)",
-    "delay(150)"
+    "writedata(0x00)",      # End gamma curve
+    "writecommand(0x20)",   # Display inversion OFF (normal polarity)
+    "writecommand(0x36)",   # MADCTL: memory access (rotation, RGB/BGR)
+    "writedata(0x28)",      # Sets BGR + scan direction
+    "writecommand(0x3A)",   # COLMOD: pixel format
+    "writedata(0x55)",      # 16-bit RGB565
+    "writecommand(0x11)",   # Exit Sleep mode
+    "delay(150)",           # Power circuits stabilize
+    "writecommand(0x29)",   # Display ON
+    "delay(25)",            # Allow first frame timing
+    "writecommand(0x2A)",   # CASET (column address set)
+    "writedata(0x00)",      # Start column high byte
+    "writedata(0x00)",      # Start column low byte = 0
+    "writedata(0x01)",      # End column high byte
+    "writedata(0xDF)",      # End column low byte = 479 (0x1DF)
+    "writecommand(0x2B)",   # PASET (row/page address set)
+    "writedata(0x00)",      # Start row high byte
+    "writedata(0x00)",      # Start row low byte = 0
+    "writedata(0x01)",      # End row high byte
+    "writedata(0x3F)",      # End row low byte = 319 (0x13F)
+    "delay(150)"            # Stabilize before drawing
 ]
+
 state = 0b0000010
 delays = {}
 
@@ -95,5 +96,5 @@ with open("output.txt", "w") as f:
             delays[f"7'b{s}"] = int(cmd[6:-1])
 
         if cmd.startswith("writecommand") or cmd.startswith("writedata"):
-            f.write("end\n\n")
+            f.write("end\n")
         state += 1
