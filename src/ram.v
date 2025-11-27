@@ -17,4 +17,5 @@ module ramLine (
     always @(posedge clock) begin
         readData <= mem[readAddress];
     end
+
 endmodule

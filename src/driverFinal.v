@@ -5,8 +5,7 @@ module top (
     output reg select,
     output reg reset,
     output reg write,
-    output reg extraStatus,
-    input wire start
+    output reg extraStatus
 );
 
     // Driver Pipeline
@@ -23,16 +22,28 @@ module top (
     wire slowClock;
     assign slowClock = divider[20];
     reg busy;
+    wire start;
 
     // Memory Interface
     reg [8:0] readAddress;
-    reg [15:0] readData;
-    reg [8:0] writeAddress;
-    reg [15:0] writeData;
-    reg writeEnable;
+    wire [15:0] readData;
+    wire [8:0] writeAddress;
+    wire [15:0] writeData;
+    wire writeEnable;
+
+    // Framebuffer Drawer
+    renderer render (
+        .clock(clock),
+        .start(start),
+        .busy(busy),
+        .writeAddress(writeAddress),
+        .writeData(writeData),
+        .writeEnable(writeEnable),
+        .yCoord(yCoord)
+    );
 
     // RAM Instance
-    ramLine myRam (
+    ramLine Ram (
         .clock(clock),
         .readAddress(readAddress),
         .readData(readData),
@@ -55,6 +66,7 @@ module top (
         extraStatus = 1'd1;
         xCoord = 9'd0;
         yCoord = 9'd0;
+        busy = 1'd0;
     end
 
     always @(posedge clock) begin
@@ -532,8 +544,9 @@ module top (
                     end
                 endcase
             end else begin
-                if (yCoord < 9'd320) begin
+                if (start | busy) begin
                     if (xCoord < 9'd480) begin
+                        busy <= 1'd1;
                         case (writeCycle)
                             3'b000: begin
                                 extraStatus <= 1'd0;
@@ -543,7 +556,7 @@ module top (
                                 readAddress <= xCoord;
                             end
                             3'b001: begin
-                                dataBus <= readData;
+                                dataBus <= 16'hFF00; // readData
                                 writeCycle <= writeCycle + 3'd1;
                             end
                             3'b010: begin
@@ -559,22 +572,15 @@ module top (
                                 select     <= 1'd1;
                             end
                             3'b101: begin
-                                xCoord  <= xCoord + 9'd1;
-                                if (delay < 22'd297000) begin // ~11ms
-                                    delay <= delay + 22'd1;
-                                end else begin
-                                    writeCycle  <= 3'd0;
-                                    delay <= 22'd0;
-                                end
+                                xCoord <= xCoord + 9'd1;
+                                writeCycle <= 3'd0;
                             end
                         endcase
                     end else begin
+                        busy <= 1'd0;
                         xCoord <= 9'd0;
                         yCoord <= yCoord + 9'd1;
                     end
-                end else begin
-                    yCoord <= 9'd0;
-                    xCoord <= 9'd0;
                 end
             end
         end
