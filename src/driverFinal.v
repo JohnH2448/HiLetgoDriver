@@ -548,30 +548,33 @@ module top (
                     if (xCoord < 9'd480) begin
                         busy <= 1'd1;
                         case (writeCycle)
-                            3'b000: begin
+                            3'd0: begin
                                 extraStatus <= 1'd0;
                                 command     <= 1'd1;
                                 writeCycle  <= writeCycle + 3'd1;
                                 select <= 1'd0;
                                 readAddress <= xCoord;
                             end
-                            3'b001: begin
-                                dataBus <= 16'hFF00; // readData
+                            3'd1: begin
                                 writeCycle <= writeCycle + 3'd1;
                             end
-                            3'b010: begin
+                            3'd2: begin
+                                dataBus <= readData;
+                                writeCycle <= writeCycle + 3'd1;
+                            end
+                            3'd3: begin
                                 write      <= 1'd0;
                                 writeCycle <= writeCycle + 3'd1;
                             end
-                            3'b011: begin
+                            3'd4: begin
                                 write      <= 1'd1;
                                 writeCycle <= writeCycle + 3'd1;
                             end
-                            3'b100: begin
+                            3'd5: begin
                                 writeCycle <= writeCycle + 3'd1;
                                 select     <= 1'd1;
                             end
-                            3'b101: begin
+                            3'd6: begin
                                 xCoord <= xCoord + 9'd1;
                                 writeCycle <= 3'd0;
                             end
